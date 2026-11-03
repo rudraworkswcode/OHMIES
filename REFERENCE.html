@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VoltVault & GreenPass - Energy Clustering & Rewards</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Tone.js for game reward audio FX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+  <!-- Chart.js for industrial margin visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              900: '#14532d',
+            },
+            codGold: '#f59e0b',
+            codDark: '#0f172a',
+            codPanel: '#1e293b'
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+    /* Custom scrollbar for Battlepass Road */
+    .battlepass-scroll::-webkit-scrollbar {
+      height: 8px;
+    }
+    .battlepass-scroll::-webkit-scrollbar-track {
+      background: #0f172a;
+      border-radius: 9999px;
+    }
+    .battlepass-scroll::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 9999px;
+    }
+    .battlepass-scroll::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+
+    /* Glow utilities */
+    .glow-gold {
+      box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.45);
+    }
+    .glow-green {
+      box-shadow: 0 0 25px -5px rgba(34, 197, 94, 0.4);
+    }
+    .glow-cyan {
+      box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.35);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- ================= TOP NAVIGATION ================= -->
+  <nav class="border-b border-slate-800/80 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-brand-600 via-emerald-500 to-amber-400 p-[2px] shadow-lg shadow-brand-500/20">
+          <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+            <i data-lucide="zap" class="w-5 h-5 text-brand-400"></i>
+          </div>
+        </div>
+        <div>
+          <span class="font-black text-xl tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-amber-400 bg-clip-text text-transparent">VoltVault</span>
+          <span class="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 ml-2 bg-slate-800 text-slate-300 rounded border border-slate-700">Cluster AI v2.4</span>
+        </div>
+      </div>
+
+      <div id="nav-user-badge" class="hidden flex items-center gap-4">
+        <div class="text-right hidden sm:block">
+          <p id="nav-user-name" class="text-xs font-semibold text-slate-200">Consumer #DEMO</p>
+          <p id="nav-user-cluster" class="text-[10px] text-brand-400 font-mono">Cluster: Identifying...</p>
+        </div>
+        <button onclick="handleLogout()" class="px-3 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-800 text-xs text-slate-300 transition flex items-center gap-1.5">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Exit Profile
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ================= MAIN CONTAINER ================= -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- ================= STAGE 1: ONBOARDING & KYC MODAL / VIEW ================= -->
+    <section id="onboarding-section" class="transition-all duration-300">
+      <div class="max-w-2xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+        <div class="absolute -top-24 -right-24 w-60 h-60 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -left-24 w-60 h-60 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="text-center mb-8">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Verified Smart Meter KYC
+          </span>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Onboard Your Meter Profile</h1>
+          <p class="text-slate-400 text-sm mt-2">Connect your electricity meter to unlock peer cluster benchmarking, AI reduction goals, and tangible economic rewards.</p>
+        </div>
+
+        <form id="kyc-form" onsubmit="event.preventDefault(); processKYC();" class="space-y-6">
+          <!-- Sector Selector (Domestic vs Commercial) -->
+          <div>
+            <label class="block text-xs uppercase font-bold tracking-wider text-slate-400 mb-2">1. Sector Classification</label>
+            <div class="grid grid-cols-2 gap-3">
+              <label class="cursor-pointer">
+                <input type="radio" name="sector" value="domestic" checked onchange="toggleSectorFields('domestic')" class="peer sr-only">
+                <div class="p-4 rounded-xl border border-slate-700 bg-slate-800/60 peer-checked:border-brand-400 peer-checked:bg-brand-500/10 peer-checked:shadow-md transition text-center">
+                  <i data-lucide="home" class="w-6 h-6 mx-auto mb-2 text-slate-400 peer-checked:text-brand-400"></i>
+                  <div class="font-semibold text-sm text-slate-200">Domestic Household</div>
+                  <div class="text-[11px] text-slate-400 mt-0.5">Apartments & Villas</div>
+                </div>
+              </label>
+
+              <label class="cursor-pointer">
+                <input type="radio" name="sector" value="commercial" onchange="toggleSectorFields('commercial')" class="peer sr-only">
+                <div class="p-4 rounded-xl border border-slate-700 bg-slate-800/60 peer-checked:border-amber-400 peer-checked:bg-amber-500/10 peer-checked:shadow-md transition text-center">
+                  <i data-lucide="factory" class="w-6 h-6 mx-auto mb-2 text-slate-400 peer-checked:text-amber-400"></i>
+                  <div class="font-semibold text-sm text-slate-200">Commercial / Industry</div>
+                  <div class="text-[11px] text-slate-400 mt-0.5">Micro, Small & Med Enterprises</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Domestic Property Type Sub-selector -->
+          <div id="domestic-options-block">
+            <label class="block text-xs uppercase font-bold tracking-wider text-slate-400 mb-2">2. Dwelling Architecture</label>
+            <div class="grid grid-cols-3 gap-3">
+              <label class="cursor-pointer">
+                <input type="radio" name="domestic_type" value="apartment" checked class="peer sr-only">
+                <div class="p-3 rounded-lg border border-slate-800 bg-slate-800/40 peer-checked:border-brand-400 peer-checked:bg-brand-500/10 text-center text-xs font-medium text-slate-300 transition">
+                  High-Rise Apartment (2-3 BHK)
+                </div>
+              </label>
+              <label class="cursor-pointer">
+                <input type="radio" name="domestic_type" value="villa" class="peer sr-only">
+                <div class="p-3 rounded-lg border border-slate-800 bg-slate-800/40 peer-checked:border-brand-400 peer-checked:bg-brand-500/10 text-center text-xs font-medium text-slate-300 transition">
+                  Independent Bungalow / Villa
+                </div>
+              </label>
+              <label class="cursor-pointer">
+                <input type="radio" name="domestic_type" value="studio" class="peer sr-only">
+                <div class="p-3 rounded-lg border border-slate-800 bg-slate-800/40 peer-checked:border-brand-400 peer-checked:bg-brand-500/10 text-center text-xs font-medium text-slate-300 transition">
+                  Compact Studio / Shared
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Commercial Industry Type Sub-selector -->
+          <div id="commercial-options-block" class="hidden space-y-3">
+            <label class="block text-xs uppercase font-bold tracking-wider text-slate-400 mb-1">2. Industry Segment & Load Category</label>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+              <!-- Micro -->
+              <div class="space-y-1.5">
+                <div class="text-[11px] font-bold text-amber-400 uppercase tracking-wider">Micro Industry</div>
+                <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-800/50 border border-slate-800 cursor-pointer hover:border-slate-700">
+                  <input type="radio" name="commercial_type" value="flour_mill" checked class="accent-amber-400">
+                  <span class="text-xs text-slate-200">Flour Mill (Chakki)</span>
+                </label>
+                <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-800/50 border border-slate-800 cursor-pointer hover:border-slate-700">
+                  <input type="radio" name="commercial_type" value="tailor" class="accent-amber-400">
+                  <span class="text-xs text-slate-200">Garment & Tailor</span>
+                </label>
+                <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-800/50 border border-slate-800 cursor-pointer hover:border-slate-700">
+                  <input type="radio" name="commercial_type" value="salon" class="accent-amber-400">
+                  <span class="text-xs text-slate-200">Salon & Wellness</span>
+                </label>
+              </div>
+
+              <!-- Small -->
+              <div class="space-y-1.5">
+                <div class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider">Small Industry</div>
+                <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-800/50 border border-slate-800 cursor-pointer hover:border-slate-700">
+                  <input type="radio" name="commercial_type" value="garage" class="accent-cyan-400">
+                  <span class="text-xs text-slate-200">Auto Garage & Lift</span>
+                </label>
+                <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-800/50 border border-slate-800 cursor-pointer hover:border-slate-700">
+                  <input type="radio" name="commercial_type" value="photo_studio" class="accent-cyan-400">
+                  <span class="text-xs text-slate-200">Photo / VFX Studio</span>
+                </label>
+                <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-800/50 border border-slate-800 cursor-pointer hover:border-slate-700">
+                  <input type="radio" name="commercial_type" value="bakery" class="accent-cyan-400">
+                  <span class="text-xs text-slate-200">Commercial Bakery</span>
+                </label>
+              </div>
+
+              <!-- Med -->
+              <div class="space-y-1.5">
+                <div class="text-[11px] font-bold text-indigo-400 uppercase tracking-wider">Medium Industry</div>
+                <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-800/50 border border-slate-800 cursor-pointer hover:border-slate-700">
+                  <input type="radio" name="commercial_type" value="workspace" class="accent-indigo-400">
+                  <span class="text-xs text-slate-200">IT / Co-Workspace</span>
+                </label>
+                <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-800/50 border border-slate-800 cursor-pointer hover:border-slate-700">
+                  <input type="radio" name="commercial_type" value="showroom" class="accent-indigo-400">
+                  <span class="text-xs text-slate-200">Retail Showroom</span>
+                </label>
+                <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-800/50 border border-slate-800 cursor-pointer hover:border-slate-700">
+                  <input type="radio" name="commercial_type" value="pharmacy" class="accent-indigo-400">
+                  <span class="text-xs text-slate-200">24/7 Cold Pharmacy</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Meter Details & Rapid Pre-sets -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="block text-xs uppercase font-bold tracking-wider text-slate-400">3. Utility Smart Meter Identifier</label>
+              <div class="text-[11px] text-slate-400">Quick Test Profiles:</div>
+            </div>
+
+            <!-- Demo Fill Buttons -->
+            <div class="flex flex-wrap gap-2 mb-2">
+              <button type="button" onclick="loadSamplePreset('DOM-9821', 'domestic', 'apartment')" class="px-2.5 py-1 text-[11px] bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-md text-emerald-300 font-mono">
+                ⚡ Domestic Night-Owl
+              </button>
+              <button type="button" onclick="loadSamplePreset('COM-7714', 'commercial', 'flour_mill')" class="px-2.5 py-1 text-[11px] bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-md text-amber-300 font-mono">
+                🏭 Micro Flour Mill
+              </button>
+              <button type="button" onclick="loadSamplePreset('COM-3390', 'commercial', 'bakery')" class="px-2.5 py-1 text-[11px] bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-md text-cyan-300 font-mono">
+                🥐 Small Bakery
+              </button>
+              <button type="button" onclick="loadSamplePreset('MED-4501', 'commercial', 'pharmacy')" class="px-2.5 py-1 text-[11px] bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-md text-indigo-300 font-mono">
+                💊 Med Cold Chain
+              </button>
+            </div>
+
+            <div class="relative">
+              <i data-lucide="cpu" class="w-5 h-5 text-slate-500 absolute left-3.5 top-3.5"></i>
+              <input type="text" id="meter-id-input" required placeholder="e.g. MTR-KA-994827" value="DOM-9821" class="w-full pl-11 pr-4 py-3 bg-slate-950 border border-slate-700 rounded-xl font-mono text-sm text-white placeholder-slate-600 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" id="btn-analyze" class="w-full py-3.5 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/25 transition-all flex items-center justify-center gap-2">
+            <span>Query Meter & Run Usage Clustering</span>
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ================= STAGE 2: CLUSTER PROFILE & DASHBOARD (HIDDEN INITIALLY) ================= -->
+    <div id="dashboard-view" class="hidden space-y-8">
+
+      <!-- CLUSTERING INSIGHT BANNER -->
+      <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div class="space-y-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <span id="badge-cluster-name" class="px-3 py-1 text-xs font-bold font-mono uppercase rounded-full bg-brand-500/20 text-brand-400 border border-brand-500/30">
+                Cluster #4: Night Heavy Shift
+              </span>
+              <span id="badge-sector-tag" class="px-2.5 py-0.5 text-xs font-semibold rounded-md bg-slate-800 text-slate-300 border border-slate-700">
+                Domestic High-Rise
+              </span>
+              <span class="text-xs text-slate-400 font-mono">Meter ID: <strong id="lbl-meter-id" class="text-slate-200">DOM-9821</strong></span>
+            </div>
+            <h2 id="cluster-title" class="text-xl sm:text-2xl font-black text-white">Profile Synced with 1,420 Peer Households</h2>
+            <p id="cluster-desc" class="text-sm text-slate-400 max-w-2xl">
+              Your meter signals heavy non-baseload draws between 8:00 PM and 1:30 AM (HVAC & induction cooking). You sit in the 68th percentile of energy intensity for your housing typology.
+            </p>
+          </div>
+
+          <!-- Dynamic Target Card -->
+          <div class="bg-slate-950/80 border border-slate-800 p-4 rounded-xl flex items-center gap-5 min-w-[280px]">
+            <div class="h-12 w-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+              <i data-lucide="target" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <p class="text-[11px] uppercase tracking-wider text-slate-400 font-bold">This Week's Cluster Goal</p>
+              <p id="target-kwh-goal" class="text-xl font-black text-white font-mono">Cut 14.5 kWh</p>
+              <p id="target-cash-goal" class="text-xs text-emerald-400 font-semibold font-mono">≈ ₹165.00 In Pocket</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metric Cards Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-800/80">
+          <div class="bg-slate-950/50 p-3 rounded-xl border border-slate-800/50">
+            <span class="text-[11px] text-slate-400 block mb-1">Average Daily Draw</span>
+            <span id="stat-daily-kwh" class="text-lg font-bold font-mono text-slate-100">18.4 kWh/d</span>
+          </div>
+          <div class="bg-slate-950/50 p-3 rounded-xl border border-slate-800/50">
+            <span class="text-[11px] text-slate-400 block mb-1">Peak Window Intensity</span>
+            <span id="stat-peak-window" class="text-lg font-bold font-mono text-amber-400">7:00 PM - 11:30 PM</span>
+          </div>
+          <div class="bg-slate-950/50 p-3 rounded-xl border border-slate-800/50">
+            <span class="text-[11px] text-slate-400 block mb-1">Grid Carbon Footprint</span>
+            <span id="stat-carbon" class="text-lg font-bold font-mono text-emerald-400">12.2 kg CO₂/d</span>
+          </div>
+          <div class="bg-slate-950/50 p-3 rounded-xl border border-slate-800/50">
+            <span class="text-[11px] text-slate-400 block mb-1">Tariff Bracket</span>
+            <span id="stat-tariff" class="text-lg font-bold font-mono text-cyan-400">₹8.50 / kWh (High Slab)</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TRACK A: DOMESTIC "GREEN PASS" ROAD & PERSONAL PROFILE ================= -->
+      <section id="domestic-track-block" class="space-y-8">
+        
+        <!-- Domestic Personal Profile Analytics Hub -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 lg:p-8 shadow-2xl relative overflow-hidden">
+          <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-slate-800 gap-4">
+            <div class="flex items-center gap-3">
+              <div class="h-12 w-12 rounded-2xl bg-gradient-to-tr from-brand-500 to-emerald-400 flex items-center justify-center text-slate-950 shadow-lg shadow-brand-500/20">
+                <i data-lucide="user-check" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-xl font-black text-white" id="dom-profile-name">Domestic Resident Profile</h3>
+                  <span id="dom-tier-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-brand-500/20 text-brand-400 border border-brand-500/30">
+                    Tier: Family Home
+                  </span>
+                </div>
+                <p class="text-xs text-slate-400" id="dom-profile-subtitle">Anonymized Meter Consumer ID: DOM-9821 • 3-Phase Residential Smart Meter</p>
+              </div>
+            </div>
+
+            <!-- Consumption Archetype Snapshot -->
+            <div class="flex items-center gap-4 text-xs font-mono bg-slate-950 p-3 rounded-2xl border border-slate-800">
+              <div>
+                <span class="text-slate-500 block text-[10px] uppercase font-bold">Monthly Estimate</span>
+                <span id="dom-stat-monthly" class="text-white font-bold text-sm">552 kWh/mo</span>
+              </div>
+              <div class="h-6 w-[1px] bg-slate-800"></div>
+              <div>
+                <span class="text-slate-500 block text-[10px] uppercase font-bold">Peak Slot</span>
+                <span id="dom-stat-peak-slot" class="text-amber-400 font-bold text-sm">Evening (21:00)</span>
+              </div>
+              <div class="h-6 w-[1px] bg-slate-800"></div>
+              <div>
+                <span class="text-slate-500 block text-[10px] uppercase font-bold">Weekend Ratio</span>
+                <span id="dom-stat-weekend" class="text-cyan-400 font-bold text-sm">1.18x</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Time Slot Breakdown & Appliance Allocation Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+            <!-- Time-of-Day Slots (Night, Morning, Afternoon, Evening) -->
+            <div class="space-y-3">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                <i data-lucide="clock" class="w-4 h-4 text-brand-400"></i> Usage by Time Slot (kWh/day)
+              </h4>
+              <div class="space-y-2" id="dom-slot-bars">
+                <!-- Injected via JS based on clustering logic -->
+              </div>
+            </div>
+
+            <!-- 24-Hour Residential Load Chart -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                  <i data-lucide="activity" class="w-4 h-4 text-cyan-400"></i> Hourly Load Curve vs Peer Tier
+                </h4>
+                <span class="text-[10px] font-mono text-slate-500">24-Hr Cycle</span>
+              </div>
+              <div class="h-44 w-full bg-slate-950/60 rounded-xl p-2 border border-slate-800/80">
+                <canvas id="domHourlyChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Rule-Based Personalized Tips from Clustering Model -->
+            <div class="space-y-3">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i> Cluster-Derived Smart Tips
+              </h4>
+              <div id="dom-tips-list" class="space-y-2 text-xs text-slate-300">
+                <!-- Injected via tips_for(r) Python equivalent in JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Header & Level Info for Battle Pass -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-2xl font-black tracking-tight text-white flex items-center gap-2">
+                <i data-lucide="gamepad-2" class="w-6 h-6 text-amber-400"></i> The GreenPass Road
+              </h3>
+              <span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono font-bold border border-amber-500/30">
+                SEASON 1: ZERO-WASTE
+              </span>
+            </div>
+            <p class="text-xs text-slate-400 mt-1">
+              Every weekly conservation goal met fills your battle-pass bar. Unlock actual items you can purchase with your bank savings!
+            </p>
+          </div>
+
+          <!-- Sound Effects Toggle & Quick Stats -->
+          <div class="flex items-center gap-3">
+            <button onclick="toggleAudio()" id="btn-audio-toggle" class="p-2.5 rounded-xl border border-slate-800 bg-slate-900 text-slate-400 hover:text-white hover:border-slate-700 transition" title="Toggle Sound FX">
+              <i data-lucide="volume-2" class="w-4 h-4"></i>
+            </button>
+            <div class="px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-3">
+              <div class="text-right">
+                <p class="text-[10px] uppercase font-bold text-slate-400">Green Streak</p>
+                <p id="dom-streak-count" class="text-sm font-black font-mono text-brand-400">3 WEEKS ACTIVE 🔥</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CoD Style Battle Pass Progression Roadmap Card -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 relative overflow-hidden shadow-2xl">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <div class="h-9 w-9 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center font-black font-mono text-amber-300">
+                W3
+              </div>
+              <div>
+                <div class="text-xs font-bold uppercase tracking-wider text-slate-300">Active Tier: Week 3 In Progress</div>
+                <div class="text-[11px] text-slate-400">₹495 Total Accumulated Savings in Vault</div>
+              </div>
+            </div>
+
+            <!-- Simulation Controls -->
+            <div class="flex items-center gap-2">
+              <button onclick="simulateStreakAdvance()" class="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-xs font-semibold flex items-center gap-1.5 transition">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Simulate 1 Week Goal Hit (+XP)
+              </button>
+              <button onclick="resetPassProgress()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 text-xs transition" title="Reset XP">
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Overall Level Progress Bar -->
+          <div class="relative w-full h-3 bg-slate-950 rounded-full overflow-hidden border border-slate-800 mb-8">
+            <div id="battlepass-progress-bar" class="h-full bg-gradient-to-r from-brand-500 via-amber-400 to-emerald-400 transition-all duration-700 relative" style="width: 25%;">
+              <div class="absolute right-0 top-0 bottom-0 w-2 bg-white blur-[2px] animate-pulse"></div>
+            </div>
+          </div>
+
+          <!-- Horizontal Scrollable Rewards Road -->
+          <div class="overflow-x-auto battlepass-scroll pb-6 pt-2">
+            <div id="battlepass-nodes-container" class="flex items-center gap-6 min-w-max px-2">
+              <!-- Dynamically Populated By JS -->
+            </div>
+          </div>
+
+          <!-- Pinned Active Target Preview Panel -->
+          <div id="active-reward-callout" class="mt-6 p-4 rounded-xl bg-slate-950 border border-amber-500/30 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+              <div class="text-3xl p-3 bg-slate-900 rounded-xl border border-slate-800" id="callout-icon">💨</div>
+              <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400">Upcoming Milestone Unlocking at Week 4</span>
+                <h4 id="callout-name" class="text-base font-bold text-white">Ionic Quick-Dry Hair Dryer</h4>
+                <p id="callout-desc" class="text-xs text-slate-400">Total ₹820 power cost eliminated. Saves enough to cover the retail price of this high-efficiency grooming tool.</p>
+              </div>
+            </div>
+            <div class="text-right flex items-center gap-3">
+              <div class="text-center px-4 py-2 bg-slate-900 rounded-lg border border-slate-800">
+                <p class="text-[10px] uppercase font-bold text-slate-400">Needed To Unlock</p>
+                <p id="callout-remaining" class="text-sm font-black font-mono text-emerald-400">₹145 More</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tangible Reward Wishlist Selector -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
+            <div class="flex items-center gap-2.5">
+              <div class="p-2 bg-pink-500/10 text-pink-400 rounded-lg"><i data-lucide="coffee" class="w-4 h-4"></i></div>
+              <h4 class="font-bold text-sm text-slate-200">Micro-Treats (Weekly)</h4>
+            </div>
+            <p class="text-xs text-slate-400">Every single week below baseline funds small instant rewards.</p>
+            <ul class="text-xs space-y-2 text-slate-300 font-mono">
+              <li class="flex justify-between border-b border-slate-800/80 pb-1.5"><span>• 2x Cold Brew Coffees</span><span class="text-emerald-400">₹180</span></li>
+              <li class="flex justify-between border-b border-slate-800/80 pb-1.5"><span>• Premium OTT Sub Monthly</span><span class="text-emerald-400">₹299</span></li>
+              <li class="flex justify-between"><span>• PVR Cinema Popcorn Combo</span><span class="text-emerald-400">₹450</span></li>
+            </ul>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
+            <div class="flex items-center gap-2.5">
+              <div class="p-2 bg-cyan-500/10 text-cyan-400 rounded-lg"><i data-lucide="headphones" class="w-4 h-4"></i></div>
+              <h4 class="font-bold text-sm text-slate-200">Mid-Tier Tech & Home (Quarterly)</h4>
+            </div>
+            <p class="text-xs text-slate-400">Accumulated 3-month savings to upgrade your lifestyle gear.</p>
+            <ul class="text-xs space-y-2 text-slate-300 font-mono">
+              <li class="flex justify-between border-b border-slate-800/80 pb-1.5"><span>• ANC Wireless Earbuds</span><span class="text-emerald-400">₹1,999</span></li>
+              <li class="flex justify-between border-b border-slate-800/80 pb-1.5"><span>• Weekend Dine-out for 2</span><span class="text-emerald-400">₹2,800</span></li>
+              <li class="flex justify-between"><span>• Smart Fitness Tracker</span><span class="text-emerald-400">₹3,499</span></li>
+            </ul>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
+            <div class="flex items-center gap-2.5">
+              <div class="p-2 bg-amber-500/10 text-amber-400 rounded-lg"><i data-lucide="plane" class="w-4 h-4"></i></div>
+              <h4 class="font-bold text-sm text-slate-200">The Grand Prize (52-Week Boss)</h4>
+            </div>
+            <p class="text-xs text-slate-400">Annual cumulative savings to fund an entire domestic escape.</p>
+            <ul class="text-xs space-y-2 text-slate-300 font-mono">
+              <li class="flex justify-between border-b border-slate-800/80 pb-1.5"><span>• Goa 3-Day Beach Retreat</span><span class="text-emerald-400">₹14,500</span></li>
+              <li class="flex justify-between border-b border-slate-800/80 pb-1.5"><span>• Round-trip Flight Tickets</span><span class="text-emerald-400">₹11,000</span></li>
+              <li class="flex justify-between"><span>• High-End Air Purifier</span><span class="text-emerald-400">₹12,800</span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TRACK B: COMMERCIAL & INDUSTRIAL INTELLIGENCE (PURE FINANCIAL & CHARTS) ================= -->
+      <section id="commercial-track-block" class="hidden space-y-6">
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-2xl font-black tracking-tight text-white flex items-center gap-2">
+                <i data-lucide="bar-chart-3" class="w-6 h-6 text-cyan-400"></i> Commercial Financial Analytics & Profit Intelligence
+              </h3>
+              <span id="comm-tier-pill" class="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono font-bold border border-cyan-500/30">
+                INDUSTRY FINANCIAL INTELLIGENCE
+              </span>
+            </div>
+            <p class="text-xs text-slate-400 mt-1">
+              Strictly focused on bottom-line financial metrics: OPEX reductions, EBITDA profit margin expansion, and power factor penalty prevention.
+            </p>
+          </div>
+
+          <!-- Peak Shift Control Simulation -->
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex items-center gap-4">
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400 block">Peak Load Shift Rate</span>
+              <span id="lbl-shift-val" class="text-xs font-bold font-mono text-cyan-400">25% Shifted to Off-Peak</span>
+            </div>
+            <input type="range" id="slider-peak-shift" min="0" max="60" value="25" step="5" oninput="updateCommercialSimulation(this.value)" class="w-28 accent-cyan-400 cursor-pointer">
+          </div>
+        </div>
+
+        <!-- 4 Primary Financial KPI Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Total Recovered Capital -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative overflow-hidden">
+            <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Direct OPEX Preserved</div>
+            <div id="comm-total-savings" class="text-2xl sm:text-3xl font-black font-mono text-emerald-400 mt-1">₹48,920</div>
+            <p class="text-[11px] text-slate-400 mt-2 flex items-center gap-1">
+              <i data-lucide="trending-up" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span class="text-emerald-400 font-semibold">+14.8% net savings</span>
+            </p>
+          </div>
+
+          <!-- Added Operating Net Margin -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative overflow-hidden">
+            <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Operating Margin Boost</div>
+            <div id="comm-margin-boost" class="text-2xl sm:text-3xl font-black font-mono text-cyan-400 mt-1">+2.45%</div>
+            <p class="text-[11px] text-slate-400 mt-2">
+              Direct expansion in quarterly net operating margin.
+            </p>
+          </div>
+
+          <!-- Equivalent Revenue Impact -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative overflow-hidden">
+            <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Equivalent Top-Line Revenue</div>
+            <div id="comm-equiv-revenue" class="text-2xl sm:text-3xl font-black font-mono text-indigo-400 mt-1">₹4,89,200</div>
+            <p class="text-[11px] text-slate-400 mt-2">
+              Based on standard 10% operating margin multiplier.
+            </p>
+          </div>
+
+          <!-- Peak Penalty Avoidance -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative overflow-hidden">
+            <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">ToD Surcharges Avoided</div>
+            <div id="comm-penalty-prevented" class="text-2xl sm:text-3xl font-black font-mono text-amber-400 mt-1">₹9,450</div>
+            <p class="text-[11px] text-slate-400 mt-2">
+              Prevented 6 PM - 10 PM peak tariff slab multipliers.
+            </p>
+          </div>
+        </div>
+
+        <!-- 2 Main Interactive Industrial Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Chart 1: Monthly Cost vs Retained Profit -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div>
+                <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                  <i data-lucide="layers" class="w-4 h-4 text-emerald-400"></i> Monthly Spend & Retained Cash
+                </h4>
+                <p class="text-[11px] text-slate-400">Comparing unoptimized baseline vs. cash retained in business.</p>
+              </div>
+            </div>
+            <div class="h-64 w-full mt-4">
+              <canvas id="industrialChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 2: Cumulative Profit Trajectory -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div>
+                <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                  <i data-lucide="line-chart" class="w-4 h-4 text-cyan-400"></i> Cumulative Profit Trajectory
+                </h4>
+                <p class="text-[11px] text-slate-400">Compounding capital added back into business reserves (₹).</p>
+              </div>
+            </div>
+            <div class="h-64 w-full mt-4">
+              <canvas id="industrialProfitChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart 3: 24-Hour Time-of-Day (ToD) Load Profile -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-2">
+            <div>
+              <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                <i data-lucide="clock" class="w-4 h-4 text-amber-400"></i> 24-Hour Load Intensity & Tariff Zones
+              </h4>
+              <p class="text-[11px] text-slate-400">Identifying costly peak-tariff windows vs. high-rebate night run windows.</p>
+            </div>
+            <div class="flex items-center gap-3 text-[11px] font-mono">
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span> Peak Surcharge (6 PM - 10 PM)</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Off-Peak Discount (11 PM - 6 AM)</span>
+            </div>
+          </div>
+          <div class="h-64 w-full mt-4">
+            <canvas id="industrialLoadChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Operational Action & Compliance Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
+            <div class="flex items-center gap-2 text-brand-400">
+              <i data-lucide="check-check" class="w-5 h-5"></i>
+              <h4 class="font-bold text-sm text-slate-100">Specific Cluster Action Plan</h4>
+            </div>
+            <ul id="comm-recommendations-list" class="space-y-2 text-xs text-slate-300">
+              <!-- Injected by JS -->
+            </ul>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
+            <div class="flex items-center gap-2 text-indigo-400">
+              <i data-lucide="award" class="w-5 h-5"></i>
+              <h4 class="font-bold text-sm text-slate-100">Green Commerce Certification</h4>
+            </div>
+            <p class="text-xs text-slate-400">
+              Based on maintaining energy intensity in the top 15% tier among peer operators, this facility qualifies for the municipal Clean Energy Compliance Seal.
+            </p>
+            <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+              <div>
+                <p class="text-xs font-bold text-slate-200">ESG Tier 1 Vendor Status</p>
+                <p class="text-[10px] text-emerald-400 font-mono">Valid through Q4 2026</p>
+              </div>
+              <button onclick="copyBadgeCode()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 rounded border border-slate-700 transition">
+                Copy Badge
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ================= "WHAT-IF" SAVINGS PLAYGROUND ================= -->
+      <section class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+          <div>
+            <h4 class="font-bold text-white text-base flex items-center gap-2">
+              <i data-lucide="sliders" class="w-4 h-4 text-brand-400"></i> Interactive Reduction Simulator
+            </h4>
+            <p class="text-xs text-slate-400">Slide to test what shaving off daily power does to your rewards and financial reserves.</p>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400">Calculated Annualized Gain: </span>
+            <span id="sim-annual-gain" class="text-sm font-black font-mono text-emerald-400">₹14,600 / yr</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+          <div>
+            <div class="flex justify-between text-xs text-slate-300 mb-2">
+              <span>Target Conservation Percentage</span>
+              <span id="sim-percent-lbl" class="font-bold font-mono text-brand-400">15% Cutback</span>
+            </div>
+            <input type="range" id="sim-slider" min="5" max="40" value="15" step="1" oninput="runInteractiveSimulator(this.value)" class="w-full accent-brand-500 cursor-pointer">
+            <div class="flex justify-between text-[10px] text-slate-500 mt-1 font-mono">
+              <span>5% (Light effort)</span>
+              <span>20% (Moderate)</span>
+              <span>40% (Aggressive)</span>
+            </div>
+          </div>
+
+          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center justify-around text-center">
+            <div>
+              <p class="text-[10px] uppercase font-bold text-slate-400">Monthly Saved</p>
+              <p id="sim-monthly-cash" class="text-lg font-black font-mono text-emerald-400">₹1,215</p>
+            </div>
+            <div class="h-8 w-[1px] bg-slate-800"></div>
+            <div>
+              <p class="text-[10px] uppercase font-bold text-slate-400">CO₂ Avoided</p>
+              <p id="sim-co2-saved" class="text-lg font-black font-mono text-teal-400">118 kg/mo</p>
+            </div>
+            <div class="h-8 w-[1px] bg-slate-800"></div>
+            <div>
+              <p class="text-[10px] uppercase font-bold text-slate-400">Equiv. Trees</p>
+              <p id="sim-trees-saved" class="text-lg font-black font-mono text-amber-400">5.9 Trees</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- ================= IN-APP NOTIFICATION TOAST ================= -->
+  <div id="toast" class="fixed bottom-6 right-6 max-w-sm bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl shadow-2xl z-50 transform translate-y-24 opacity-0 transition-all duration-300 flex items-center gap-3">
+    <div id="toast-icon" class="p-2 bg-brand-500/20 text-brand-400 rounded-lg">
+      <i data-lucide="info" class="w-4 h-4"></i>
+    </div>
+    <div>
+      <div id="toast-title" class="text-xs font-bold">Notification</div>
+      <div id="toast-msg" class="text-xs text-slate-300">Message content here.</div>
+    </div>
+  </div>
+
+  <!-- ================= LOGIC SCRIPT ================= -->
+  <script>
+    /* -------------------------------------------------------------
+       1. SYNTHETIC CLUSTERING & ENERGY DATASET
+    ------------------------------------------------------------- */
+    const METER_DATABASE = {
+      // Domestic Profiles
+      "DOM-9821": {
+        sector: "domestic",
+        subType: "apartment",
+        title: "Cluster D-3: Evening & Late-Night High Load",
+        clusterTag: "Night Owls (HVAC + Induction)",
+        peerCount: 1420,
+        dailyKwh: 18.4,
+        peakWindow: "8:00 PM - 1:30 AM",
+        carbonKg: 15.1,
+        tariffRate: 8.5,
+        targetCutKwh: 14.5,
+        targetCash: 165.0,
+        streakWeeks: 3,
+        accumulatedSavings: 495,
+        description: "Your meter shows heavy draw after 8 PM, mostly from dual split air-conditioners and night appliances. You consume 22% more than the energy-efficient cluster benchmark."
+      },
+      "DOM-1044": {
+        sector: "domestic",
+        subType: "villa",
+        title: "Cluster D-1: High-Base Distributed Daytime Draw",
+        clusterTag: "Daytime Remote-Work Villa",
+        peerCount: 890,
+        dailyKwh: 26.2,
+        peakWindow: "11:00 AM - 5:00 PM",
+        carbonKg: 21.4,
+        tariffRate: 9.2,
+        targetCutKwh: 22.0,
+        targetCash: 240.0,
+        streakWeeks: 1,
+        accumulatedSavings: 240,
+        description: "Continual daytime usage with multiple refrigerator units and home office HVAC. Ideal candidate for solar rooftop tie-in or daytime thermostat set-point adjustments."
+      },
+      // Commercial Profiles: Micro
+      "COM-7714": {
+        sector: "commercial",
+        subType: "flour_mill",
+        title: "Cluster C-Micro-M: Inductive Heavy Motor Cycle",
+        clusterTag: "Micro: Heavy Motor Operator",
+        peerCount: 340,
+        dailyKwh: 54.0,
+        peakWindow: "7:00 AM - 1:00 PM",
+        carbonKg: 44.2,
+        tariffRate: 10.5,
+        targetCutKwh: 45.0,
+        targetCash: 520.0,
+        streakWeeks: 5,
+        accumulatedSavings: 28400,
+        todAvoided: 5200,
+        equivRevMultiplier: 10,
+        monthlyData: [62000, 61500, 58000, 54000, 52000, 48500],
+        baselineData: [62000, 62000, 62000, 62000, 62000, 62000],
+        recommendations: [
+          "Shift coarse grain pulverizing run from 7:00 PM to 6:00 AM off-peak window to capture ₹1.80/unit rebate.",
+          "Check motor power factor; current 0.88 PF is triggering an estimated ₹900 monthly reactive surcharge.",
+          "Stagger startup times for primary 15HP induction motor to avoid instant kVA maximum demand spikes."
+        ]
+      },
+      // Commercial Profiles: Small
+      "COM-3390": {
+        sector: "commercial",
+        subType: "bakery",
+        title: "Cluster C-Small-B: High Thermal Radiant Convection",
+        clusterTag: "Small: Continuous Thermal Bakery",
+        peerCount: 280,
+        dailyKwh: 88.0,
+        peakWindow: "3:00 AM - 9:00 AM & 5:00 PM - 8:00 PM",
+        carbonKg: 72.1,
+        tariffRate: 11.2,
+        targetCutKwh: 70.0,
+        targetCash: 850.0,
+        streakWeeks: 4,
+        accumulatedSavings: 48920,
+        todAvoided: 9450,
+        equivRevMultiplier: 10,
+        monthlyData: [98000, 95000, 91000, 88000, 84000, 81000],
+        baselineData: [98000, 98000, 98000, 98000, 98000, 98000],
+        recommendations: [
+          "Execute initial deck oven preheating during 3:00 AM – 5:30 AM night tariff window.",
+          "Thermal gasket inspection on oven doors will recover an estimated 8-10% in radiated loss.",
+          "Interlock exhaust hoods to operate with variable frequency drives (VFD) rather than constant 100% draw."
+        ]
+      },
+      // Commercial Profiles: Medium
+      "MED-4501": {
+        sector: "commercial",
+        subType: "pharmacy",
+        title: "Cluster C-Med-P: 24/7 Critical Cold-Chain & Chiller",
+        clusterTag: "Medium: 24/7 Cold Chain Retail",
+        peerCount: 195,
+        dailyKwh: 124.0,
+        peakWindow: "24/7 Continuous Baseline",
+        carbonKg: 101.6,
+        tariffRate: 11.8,
+        targetCutKwh: 90.0,
+        targetCash: 1150.0,
+        streakWeeks: 6,
+        accumulatedSavings: 86400,
+        todAvoided: 14200,
+        equivRevMultiplier: 12,
+        monthlyData: [142000, 138000, 132000, 126000, 121000, 116000],
+        baselineData: [142000, 142000, 142000, 142000, 142000, 142000],
+        recommendations: [
+          "Isolate non-critical retail showcase display lighting from critical vaccine cold storage circuits.",
+          "Install smart digital thermostat logging on medical deep freezers with automatic defrost timers scheduled at 2 AM.",
+          "Prevent auxiliary diesel genset auto-kick on brief brownouts using a high-efficiency solid-state inverter buffer."
+        ]
+      }
+    };
+
+    /* -------------------------------------------------------------
+       2. BATTLEPASS MILESTONE ROAD SCHEMA (DOMESTIC)
+    ------------------------------------------------------------- */
+    const BATTLEPASS_ROAD = [
+      {
+        week: 1,
+        title: "Artisanal Coffee & Snack",
+        cost: 180,
+        icon: "☕",
+        rewardType: "Micro-Treat",
+        desc: "First conservation target met! Enough saved to buy your favorite barista coffee."
+      },
+      {
+        week: 2,
+        title: "Cinema Screening & Snack",
+        cost: 420,
+        icon: "🎬",
+        rewardType: "Micro-Treat",
+        desc: "Two weeks strong. Covers a blockbuster movie ticket and snack."
+      },
+      {
+        week: 4,
+        title: "Ionic Quick-Dry Hair Dryer",
+        cost: 820,
+        icon: "💨",
+        rewardType: "Personal Appliance",
+        desc: "Month 1 cleared. Total energy avoided directly purchases a high-efficiency salon hair dryer."
+      },
+      {
+        week: 8,
+        title: "ANC Wireless Earbuds",
+        cost: 1950,
+        icon: "🎧",
+        rewardType: "Personal Tech",
+        desc: "Two full months of cluster savings pays for wireless active noise cancelling earbuds."
+      },
+      {
+        week: 12,
+        title: "Fine Dining Dinner for Two",
+        cost: 3200,
+        icon: "🍽️",
+        rewardType: "Lifestyle Experience",
+        desc: "Quarter 1 Champion. A multi-course dinner fully sponsored by your reduced electricity bill."
+      },
+      {
+        week: 24,
+        title: "Weekend Luxury Resort Stay",
+        cost: 6500,
+        icon: "🏨",
+        rewardType: "Getaway Escape",
+        desc: "Half-year milestone. A weekend road-trip stay completely covered by grid savings."
+      },
+      {
+        week: 52,
+        title: "Domestic Flight & Vacation",
+        cost: 14500,
+        icon: "✈️",
+        rewardType: "Grand Vacation (Final Boss)",
+        desc: "Full 1-Year Conservation Master. A complete round-trip holiday escape funded by zero-waste electricity habits!"
+      }
+    ];
+
+    /* -------------------------------------------------------------
+       3. APPLICATION STATE
+    ------------------------------------------------------------- */
+    let activeProfile = null;
+    let audioEnabled = true;
+    let soundSynth = null;
+    let industrialChartInstance = null;
+    let industrialProfitChartInstance = null;
+    let industrialLoadChartInstance = null;
+    let domHourlyChartInstance = null;
+    let currentStreakOverride = 3;
+
+    /* -------------------------------------------------------------
+       4. PYTHON MODEL EQUIVALENT: TIME SLOTS, PROFILES & TIPS
+    ------------------------------------------------------------- */
+    const SLOTS_DEF = ["Night", "Morning", "Afternoon", "Evening"];
+
+    const MODEL_PROFILES = {
+      "Compact Home": {
+        desc: "Low, steady usage. Households with this usage typically resemble small homes or energy-efficient studios.",
+        tips: ["Switch to LED bulbs", "Unplug standby devices", "Choose a 5-star fridge"]
+      },
+      "Family Home": {
+        desc: "Moderate usage. Households with this usage typically resemble 3-4 person homes.",
+        tips: ["Use appliances in full loads", "Set AC to 24-26°C", "Use timers on water heaters"]
+      },
+      "Large Home": {
+        desc: "High usage. Households with this usage typically have many appliances or large cooling loads.",
+        tips: ["Install an inverter AC", "Add insulation or heavy curtains", "Check rooftop solar potential"]
+      }
+    };
+
+    const MODEL_TIME_TIPS = {
+      "Night": "Your peak is at night (00:00-05:00). Check for always-on devices, and set AC/heater sleep timers.",
+      "Morning": "Your peak is in the morning (06:00-11:00). Run the geyser on a 15-min timer and stagger appliance use.",
+      "Afternoon": "Your peak is in the afternoon (12:00-17:00). Use blinds to cut solar heat gain and avoid ironing at midday.",
+      "Evening": "Your peak is in the evening (18:00-23:00). Shift washing machine and dishwashers to off-peak night hours."
+    };
+
+    function generateModelTips(record) {
+      const baseTips = [...(MODEL_PROFILES[record.profile]?.tips || MODEL_PROFILES["Family Home"].tips)];
+      const peakSlotTip = MODEL_TIME_TIPS[record.peak_slot] + ` (peak hour: ${String(record.peak_hour).padStart(2, '0')}:00)`;
+      baseTips.push(peakSlotTip);
+
+      if (record.night_share > 0.30) {
+        baseTips.push("Over 30% of your usage is at night. Look for appliances left running overnight.");
+      }
+      if (record.weekend_ratio > 1.25) {
+        baseTips.push("Weekend usage is much higher than weekdays. Plan heavy appliance loads across the week.");
+      }
+      return baseTips;
+    }
+
+    function renderDomesticProfileAnalytics(record) {
+      document.getElementById('dom-profile-name').innerText = `${record.profile} (${record.dwelling})`;
+      document.getElementById('dom-profile-subtitle').innerText = `Anonymized Meter Consumer ID: ${record.meterId} • Benchmark Cluster: ${record.clusterTag}`;
+      document.getElementById('dom-tier-badge').innerText = `Tier: ${record.consumption_tier}`;
+      
+      document.getElementById('dom-stat-monthly').innerText = `~${Math.round(record.avg_daily_kwh * 30)} kWh/mo`;
+      document.getElementById('dom-stat-peak-slot').innerText = `${record.peak_slot} (${String(record.peak_hour).padStart(2, '0')}:00)`;
+      document.getElementById('dom-stat-weekend').innerText = `${record.weekend_ratio.toFixed(2)}x`;
+
+      // Render Time Slot Distribution Bars
+      const slotContainer = document.getElementById('dom-slot-bars');
+      slotContainer.innerHTML = '';
+      SLOTS_DEF.forEach(slot => {
+        const slotKey = slot.toLowerCase() + '_kwh';
+        const val = record[slotKey] || 0;
+        const share = record.avg_daily_kwh > 0 ? (val / record.avg_daily_kwh) * 100 : 25;
+        
+        const row = document.createElement('div');
+        row.className = "p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/80";
+        row.innerHTML = `
+          <div class="flex justify-between items-center text-xs mb-1">
+            <span class="font-medium text-slate-300">${slot}</span>
+            <span class="font-mono text-emerald-400 font-bold">${val.toFixed(2)} kWh <span class="text-slate-500 text-[10px]">(${share.toFixed(0)}%)</span></span>
+          </div>
+          <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
+            <div class="bg-gradient-to-r from-brand-500 to-teal-400 h-full rounded-full" style="width: ${Math.min(100, Math.max(10, share))}%"></div>
+          </div>
+        `;
+        slotContainer.appendChild(row);
+      });
+
+      // Render Tips from Python Model
+      const tipsContainer = document.getElementById('dom-tips-list');
+      tipsContainer.innerHTML = '';
+      const tips = generateModelTips(record);
+      tips.forEach((tip, idx) => {
+        const item = document.createElement('div');
+        item.className = "flex items-start gap-2 p-2 rounded-lg bg-slate-950/60 border border-slate-800/60";
+        item.innerHTML = `
+          <span class="h-4 w-4 rounded-full bg-brand-500/20 text-brand-400 flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">${idx + 1}</span>
+          <span class="text-slate-300 leading-snug">${tip}</span>
+        `;
+        tipsContainer.appendChild(item);
+      });
+
+      // Render 24h Load Curve Chart
+      renderDomHourlyChart(record);
+    }
+
+    function renderDomHourlyChart(record) {
+      const ctx = document.getElementById('domHourlyChart').getContext('2d');
+      if (domHourlyChartInstance) domHourlyChartInstance.destroy();
+
+      const hours = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, '0')}:00`);
+      
+      // Hourly synthesis reflecting peak_hour and slot shares
+      const peakH = record.peak_hour;
+      const baseVal = record.avg_daily_kwh / 24;
+      const userCurve = hours.map((_, h) => {
+        const dist = Math.abs(h - peakH);
+        const peakFactor = Math.max(0.4, 2.0 - (dist * 0.18));
+        return +(baseVal * peakFactor).toFixed(2);
+      });
+
+      // Peer average curve
+      const peerCurve = hours.map((_, h) => {
+        if (h >= 18 && h <= 22) return +(baseVal * 1.45).toFixed(2);
+        if (h >= 6 && h <= 9) return +(baseVal * 1.2).toFixed(2);
+        return +(baseVal * 0.7).toFixed(2);
+      });
+
+      domHourlyChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: hours,
+          datasets: [
+            {
+              label: 'Your Load (kWh)',
+              data: userCurve,
+              borderColor: '#22c55e',
+              backgroundColor: 'rgba(34, 197, 94, 0.15)',
+              fill: true,
+              tension: 0.35,
+              pointRadius: 1.5,
+              borderWidth: 2
+            },
+            {
+              label: 'Cluster Peer Average',
+              data: peerCurve,
+              borderColor: '#64748b',
+              borderDash: [4, 4],
+              pointRadius: 0,
+              fill: false,
+              borderWidth: 1.5
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 9 }, boxWidth: 10 }
+            },
+            tooltip: {
+              backgroundColor: '#0f172a',
+              titleColor: '#f8fafc',
+              bodyColor: '#34d399',
+              callbacks: {
+                label: (c) => ` ${c.dataset.label}: ${c.raw} kWh`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(51, 65, 85, 0.2)' },
+              ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 8 }, maxTicksLimit: 8 }
+            },
+            y: {
+              grid: { color: 'rgba(51, 65, 85, 0.2)' },
+              ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 8 } }
+            }
+          }
+        }
+      });
+    }
+
+    /* -------------------------------------------------------------
+       5. KYC FORM & SECTOR TOGGLING
+    ------------------------------------------------------------- */
+    function toggleSectorFields(sector) {
+      const domBlock = document.getElementById('domestic-options-block');
+      const commBlock = document.getElementById('commercial-options-block');
+      
+      if (sector === 'domestic') {
+        domBlock.classList.remove('hidden');
+        commBlock.classList.add('hidden');
+      } else {
+        domBlock.classList.add('hidden');
+        commBlock.classList.remove('hidden');
+      }
+    }
+
+    function loadSamplePreset(meterId, sector, subType) {
+      document.getElementById('meter-id-input').value = meterId;
+      
+      const sectorRadio = document.querySelector(`input[name="sector"][value="${sector}"]`);
+      if (sectorRadio) {
+        sectorRadio.checked = true;
+        toggleSectorFields(sector);
+      }
+
+      if (sector === 'domestic') {
+        const domRadio = document.querySelector(`input[name="domestic_type"][value="${subType}"]`);
+        if (domRadio) domRadio.checked = true;
+      } else {
+        const commRadio = document.querySelector(`input[name="commercial_type"][value="${subType}"]`);
+        if (commRadio) commRadio.checked = true;
+      }
+
+      showToast("Preset Loaded", `Meter ID ${meterId} filled ready for KYC.`);
+    }
+
+    function processKYC() {
+      const meterInput = document.getElementById('meter-id-input').value.trim();
+      const selectedSector = document.querySelector('input[name="sector"]:checked').value;
+      
+      // Look up synthetic DB
+      let profile = METER_DATABASE[meterInput];
+
+      // CRITICAL GUARD: If the meter in the DB doesn't match the selected sector, generate the correct profile for that sector
+      if (!profile || profile.sector !== selectedSector) {
+        if (selectedSector === 'domestic') {
+          const dType = document.querySelector('input[name="domestic_type"]:checked')?.value || "apartment";
+          const dLabels = { apartment: "Apartment (2-3 BHK)", villa: "Independent Villa", studio: "Compact Studio" };
+          
+          // Determine 3-tier mapping based on property typology
+          let tier = "Family Home";
+          let dailyKwh = 18.4;
+          let peakH = 21;
+          let peakS = "Evening";
+
+          if (dType === "studio") {
+            tier = "Compact Home";
+            dailyKwh = 7.8;
+            peakH = 22;
+            peakS = "Evening";
+          } else if (dType === "villa") {
+            tier = "Large Home";
+            dailyKwh = 29.5;
+            peakH = 14;
+            peakS = "Afternoon";
+          }
+
+          profile = {
+            sector: "domestic",
+            subType: dType,
+            dwelling: dLabels[dType] || "Residential Home",
+            profile: tier,
+            consumption_tier: tier === "Compact Home" ? "Low" : (tier === "Family Home" ? "Medium" : "High"),
+            title: `Cluster D-${dType.toUpperCase()}: ${tier} Usage Profile`,
+            clusterTag: `${tier} (${dLabels[dType]})`,
+            peerCount: 1150,
+            dailyKwh: dailyKwh,
+            avg_daily_kwh: dailyKwh,
+            peakWindow: peakS === "Evening" ? "7:30 PM - 11:30 PM" : (peakS === "Afternoon" ? "12:00 PM - 5:00 PM" : "6:00 AM - 10:00 AM"),
+            peak_hour: peakH,
+            peak_slot: peakS,
+            weekend_ratio: dType === "villa" ? 1.35 : 1.15,
+            night_kwh: +(dailyKwh * 0.22).toFixed(2),
+            morning_kwh: +(dailyKwh * 0.26).toFixed(2),
+            afternoon_kwh: +(dailyKwh * 0.24).toFixed(2),
+            evening_kwh: +(dailyKwh * 0.28).toFixed(2),
+            night_share: 0.22,
+            carbonKg: +(dailyKwh * 0.82).toFixed(1),
+            tariffRate: dailyKwh > 20 ? 9.2 : 8.0,
+            targetCutKwh: +(dailyKwh * 0.15).toFixed(1),
+            targetCash: +(dailyKwh * 0.15 * 7 * 8.0).toFixed(0),
+            streakWeeks: 3,
+            accumulatedSavings: 495,
+            description: MODEL_PROFILES[tier].desc
+          };
+        } else {
+          const cType = document.querySelector('input[name="commercial_type"]:checked')?.value || "bakery";
+          
+          // Presets for specific industrial types
+          const industryPresets = {
+            flour_mill: { daily: 54, cut: 45, cash: 520, saved: 28400, tod: 5200, rate: 10.5, name: "Flour Mill (Chakki)" },
+            tailor: { daily: 38, cut: 30, cash: 360, saved: 19800, tod: 3400, rate: 10.0, name: "Garment & Tailor" },
+            salon: { daily: 42, cut: 35, cash: 410, saved: 22600, tod: 4100, rate: 10.2, name: "Salon & Wellness" },
+            garage: { daily: 72, cut: 55, cash: 680, saved: 36500, tod: 7200, rate: 11.0, name: "Auto Garage & Lift" },
+            photo_studio: { daily: 48, cut: 40, cash: 490, saved: 26100, tod: 4800, rate: 10.5, name: "Photo / VFX Studio" },
+            bakery: { daily: 88, cut: 70, cash: 850, saved: 48920, tod: 9450, rate: 11.2, name: "Commercial Bakery" },
+            workspace: { daily: 110, cut: 85, cash: 1050, saved: 64000, tod: 11200, rate: 11.5, name: "IT / Co-Workspace" },
+            showroom: { daily: 95, cut: 75, cash: 920, saved: 54200, tod: 9800, rate: 11.2, name: "Retail Showroom" },
+            pharmacy: { daily: 124, cut: 90, cash: 1150, saved: 86400, tod: 14200, rate: 11.8, name: "24/7 Cold Pharmacy" }
+          };
+
+          const pInfo = industryPresets[cType] || industryPresets.bakery;
+          const baseBill = Math.round(pInfo.daily * 30 * pInfo.rate);
+
+          profile = {
+            sector: "commercial",
+            subType: cType,
+            title: `Cluster C-${cType.toUpperCase()}: ${pInfo.name}`,
+            clusterTag: `Industry: ${pInfo.name}`,
+            peerCount: 310,
+            dailyKwh: pInfo.daily,
+            peakWindow: "9:00 AM - 6:00 PM & Peak Surcharge",
+            carbonKg: +(pInfo.daily * 0.82).toFixed(1),
+            tariffRate: pInfo.rate,
+            targetCutKwh: pInfo.cut,
+            targetCash: pInfo.cash,
+            streakWeeks: 4,
+            accumulatedSavings: pInfo.saved,
+            todAvoided: pInfo.tod,
+            equivRevMultiplier: 10,
+            monthlyData: [
+              baseBill,
+              Math.round(baseBill * 0.96),
+              Math.round(baseBill * 0.92),
+              Math.round(baseBill * 0.88),
+              Math.round(baseBill * 0.85),
+              Math.round(baseBill * 0.82)
+            ],
+            baselineData: [baseBill, baseBill, baseBill, baseBill, baseBill, baseBill],
+            recommendations: [
+              "Conduct scheduled power factor capacitor inspection to eliminate reactive surcharges.",
+              "Enforce off-peak staging for non-continuous auxiliary motors (11 PM - 6 AM).",
+              "Audit stand-by transformer and compressor losses during off-hours."
+            ]
+          };
+        }
+      }
+
+      activeProfile = { ...profile, sector: selectedSector, meterId: meterInput };
+      currentStreakOverride = activeProfile.streakWeeks || 3;
+
+      // Transition Views
+      document.getElementById('onboarding-section').classList.add('hidden');
+      document.getElementById('dashboard-view').classList.remove('hidden');
+      document.getElementById('nav-user-badge').classList.remove('hidden');
+
+      // Update Nav
+      document.getElementById('nav-user-name').innerText = `Meter: ${meterInput}`;
+      document.getElementById('nav-user-cluster').innerText = activeProfile.clusterTag;
+
+      // Populate Common Cluster HUD
+      document.getElementById('lbl-meter-id').innerText = meterInput;
+      document.getElementById('badge-cluster-name').innerText = activeProfile.title.split(':')[0];
+      document.getElementById('badge-sector-tag').innerText = activeProfile.clusterTag;
+      document.getElementById('cluster-title').innerText = activeProfile.title;
+      document.getElementById('cluster-desc').innerText = activeProfile.description || "Segmented via utility load profile clustering. Tailored strictly to your facility's operational profile.";
+      document.getElementById('target-kwh-goal').innerText = `Cut ${activeProfile.targetCutKwh} kWh/wk`;
+      document.getElementById('target-cash-goal').innerText = `≈ ₹${activeProfile.targetCash.toFixed(2)} Retained`;
+      
+      document.getElementById('stat-daily-kwh').innerText = `${activeProfile.dailyKwh} kWh/d`;
+      document.getElementById('stat-peak-window').innerText = activeProfile.peakWindow;
+      document.getElementById('stat-carbon').innerText = `${activeProfile.carbonKg} kg CO₂/d`;
+      document.getElementById('stat-tariff').innerText = `₹${activeProfile.tariffRate.toFixed(2)} / kWh`;
+
+      // STRICT BRANCHING: DOMESTIC VS COMMERCIAL
+      if (activeProfile.sector === 'domestic') {
+        // Prepare model features if from pre-existing DB
+        if (!activeProfile.profile) {
+          activeProfile.profile = activeProfile.dailyKwh < 12 ? "Compact Home" : (activeProfile.dailyKwh < 22 ? "Family Home" : "Large Home");
+          activeProfile.consumption_tier = activeProfile.dailyKwh < 12 ? "Low" : (activeProfile.dailyKwh < 22 ? "Medium" : "High");
+          activeProfile.avg_daily_kwh = activeProfile.dailyKwh;
+          activeProfile.dwelling = activeProfile.subType === 'villa' ? "Independent Villa" : (activeProfile.subType === 'studio' ? "Compact Studio" : "Apartment (2-3 BHK)");
+          activeProfile.peak_hour = 21;
+          activeProfile.peak_slot = "Evening";
+          activeProfile.weekend_ratio = 1.28;
+          activeProfile.night_kwh = +(activeProfile.dailyKwh * 0.32).toFixed(2);
+          activeProfile.morning_kwh = +(activeProfile.dailyKwh * 0.20).toFixed(2);
+          activeProfile.afternoon_kwh = +(activeProfile.dailyKwh * 0.20).toFixed(2);
+          activeProfile.evening_kwh = +(activeProfile.dailyKwh * 0.28).toFixed(2);
+          activeProfile.night_share = 0.32;
+        }
+
+        // Show battlepass & personal profile, hide industrial
+        document.getElementById('domestic-track-block').classList.remove('hidden');
+        document.getElementById('commercial-track-block').classList.add('hidden');
+        renderDomesticProfileAnalytics(activeProfile);
+        renderBattlepassNodes();
+        updateBattlepassProgress(currentStreakOverride);
+      } else {
+        // Pure Industrial Mode: NEVER SHOW REWARDS
+        document.getElementById('domestic-track-block').classList.add('hidden');
+        document.getElementById('commercial-track-block').classList.remove('hidden');
+        initCommercialIntelligenceView();
+      }
+
+      // Re-initialize Lucide Icons
+      if (window.lucide) lucide.createIcons();
+      showToast(
+        activeProfile.sector === 'commercial' ? "Enterprise Profile Loaded" : "Domestic Profile Loaded",
+        activeProfile.sector === 'commercial' 
+          ? `Operating balance sheet & profit intelligence ready for ${activeProfile.clusterTag}.`
+          : `GreenPass Battle Track active with weekly rewards!`
+      );
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function handleLogout() {
+      document.getElementById('dashboard-view').classList.add('hidden');
+      document.getElementById('onboarding-section').classList.remove('hidden');
+      document.getElementById('nav-user-badge').classList.add('hidden');
+      if (industrialChartInstance) {
+        industrialChartInstance.destroy();
+        industrialChartInstance = null;
+      }
+      if (industrialProfitChartInstance) {
+        industrialProfitChartInstance.destroy();
+        industrialProfitChartInstance = null;
+      }
+      if (industrialLoadChartInstance) {
+        industrialLoadChartInstance.destroy();
+        industrialLoadChartInstance = null;
+      }
+      if (domHourlyChartInstance) {
+        domHourlyChartInstance.destroy();
+        domHourlyChartInstance = null;
+      }
+      activeProfile = null;
+    }
+
+    /* -------------------------------------------------------------
+       6. DOMESTIC TRACK: BATTLEPASS RENDERING & LOGIC
+    ------------------------------------------------------------- */
+    function renderBattlepassNodes() {
+      const container = document.getElementById('battlepass-nodes-container');
+      container.innerHTML = '';
+
+      BATTLEPASS_ROAD.forEach((node, index) => {
+        const isUnlocked = currentStreakOverride >= node.week;
+        const isNext = !isUnlocked && (index === 0 || currentStreakOverride >= BATTLEPASS_ROAD[index - 1].week);
+
+        const card = document.createElement('div');
+        card.className = `w-56 flex-shrink-0 rounded-2xl p-4 transition-all duration-300 relative border ${
+          isUnlocked 
+            ? 'bg-slate-900 border-amber-500/50 glow-gold shadow-lg' 
+            : isNext 
+              ? 'bg-slate-900/90 border-brand-400/60 glow-green' 
+              : 'bg-slate-950/60 border-slate-800 opacity-60'
+        }`;
+
+        card.innerHTML = `
+          <!-- Top Tag -->
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
+              isUnlocked ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-800 text-slate-400'
+            }">
+              WEEK ${node.week}
+            </span>
+            <div class="h-6 w-6 rounded-full flex items-center justify-center text-xs ${
+              isUnlocked ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-800 text-slate-500'
+            }">
+              ${isUnlocked ? '✓' : '<i data-lucide="lock" class="w-3 h-3"></i>'}
+            </div>
+          </div>
+
+          <!-- Icon / Avatar -->
+          <div class="h-20 w-full rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-center text-4xl mb-3">
+            ${node.icon}
+          </div>
+
+          <!-- Title & Valuation -->
+          <div class="font-bold text-xs text-white line-clamp-1 mb-1">${node.title}</div>
+          <div class="text-[11px] font-mono text-emerald-400 font-semibold mb-2">Valued at ₹${node.cost}</div>
+          <p class="text-[10px] text-slate-400 line-clamp-2 leading-relaxed mb-3">${node.desc}</p>
+
+          <!-- Status CTA -->
+          <div class="text-center pt-2 border-t border-slate-800/80">
+            <span class="text-[10px] font-bold uppercase tracking-wider ${
+              isUnlocked ? 'text-amber-400' : isNext ? 'text-brand-400 animate-pulse' : 'text-slate-600'
+            }">
+              ${isUnlocked ? '★ CLAIMED & UNLOCKED' : isNext ? '⚡ CURRENT OBJECTIVE' : '🔒 LOCKED'}
+            </span>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function updateBattlepassProgress(streak) {
+      currentStreakOverride = streak;
+      document.getElementById('dom-streak-count').innerText = `${streak} WEEKS ACTIVE 🔥`;
+
+      // Percentage of full 52-week bar
+      const maxWeek = 52;
+      const pct = Math.min(100, Math.round((streak / maxWeek) * 100) + 10);
+      document.getElementById('battlepass-progress-bar').style.width = `${pct}%`;
+
+      // Update Callout Card for Next Reward
+      const nextTarget = BATTLEPASS_ROAD.find(n => n.week > streak) || BATTLEPASS_ROAD[BATTLEPASS_ROAD.length - 1];
+      document.getElementById('callout-icon').innerText = nextTarget.icon;
+      document.getElementById('callout-name').innerText = nextTarget.title;
+      document.getElementById('callout-desc').innerText = nextTarget.desc;
+
+      const currentTotalSavings = streak * (activeProfile?.targetCash || 165);
+      const needed = Math.max(0, nextTarget.cost - currentTotalSavings);
+      document.getElementById('callout-remaining').innerText = needed > 0 ? `₹${needed.toFixed(0)} More` : 'UNLOCKED!';
+
+      renderBattlepassNodes();
+    }
+
+    function simulateStreakAdvance() {
+      currentStreakOverride += 1;
+      updateBattlepassProgress(currentStreakOverride);
+      playRewardSfx();
+      showToast("Goal Hit! Level Up", `Week ${currentStreakOverride} verified. Energy savings credited to your GreenPass vault!`);
+    }
+
+    function resetPassProgress() {
+      currentStreakOverride = 1;
+      updateBattlepassProgress(1);
+      showToast("Progress Reset", "Simulated streak set to Week 1.");
+    }
+
+    /* -------------------------------------------------------------
+       7. COMMERCIAL & INDUSTRIAL TRACK LOGIC (PURE FINANCIAL & CHARTS)
+    ------------------------------------------------------------- */
+    function initCommercialIntelligenceView() {
+      const p = activeProfile;
+      document.getElementById('comm-tier-pill').innerText = `${p.clusterTag.toUpperCase()} | ENTERPRISE OPEX`;
+      document.getElementById('comm-total-savings').innerText = `₹${p.accumulatedSavings.toLocaleString('en-IN')}`;
+      
+      const equivRev = p.accumulatedSavings * (p.equivRevMultiplier || 10);
+      document.getElementById('comm-equiv-revenue').innerText = `₹${equivRev.toLocaleString('en-IN')}`;
+      document.getElementById('comm-penalty-prevented').innerText = `₹${(p.todAvoided || 8500).toLocaleString('en-IN')}`;
+      document.getElementById('comm-margin-boost').innerText = `+${((p.accumulatedSavings / (p.monthlyData[0] * 6)) * 100).toFixed(2)}%`;
+
+      // Populate Recommendations
+      const list = document.getElementById('comm-recommendations-list');
+      list.innerHTML = '';
+      (p.recommendations || [
+        "Audit power factor capacitors quarterly.",
+        "Implement thermal insulation wraps on high-temperature ducting.",
+        "Enroll in the municipal automated demand response (ADR) program."
+      ]).forEach(rec => {
+        const li = document.createElement('li');
+        li.className = "flex items-start gap-2 border-b border-slate-800/80 pb-2";
+        li.innerHTML = `<i data-lucide="chevron-right" class="w-3.5 h-3.5 text-cyan-400 mt-0.5 flex-shrink-0"></i><span>${rec}</span>`;
+        list.appendChild(li);
+      });
+
+      renderIndustrialCharts(p);
+    }
+
+    function renderIndustrialCharts(p) {
+      const baseline = p.baselineData || [70000, 70000, 70000, 70000, 70000, 70000];
+      const actual = p.monthlyData || [70000, 67000, 64000, 61000, 58000, 55000];
+
+      // --- CHART 1: Monthly Cost vs Retained Gross Profit (Bar) ---
+      const ctx1 = document.getElementById('industrialChart').getContext('2d');
+      if (industrialChartInstance) industrialChartInstance.destroy();
+
+      industrialChartInstance = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: ['Month 1', 'Month 2', 'Month 3', 'Month 4', 'Month 5', 'Month 6'],
+          datasets: [
+            {
+              label: 'Unoptimized Expense Baseline (₹)',
+              data: baseline,
+              backgroundColor: 'rgba(239, 68, 68, 0.45)',
+              borderColor: 'rgba(239, 68, 68, 1)',
+              borderWidth: 1,
+              borderRadius: 6
+            },
+            {
+              label: 'Optimized Actual Power Bill (₹)',
+              data: actual,
+              backgroundColor: 'rgba(16, 185, 129, 0.85)',
+              borderColor: 'rgba(16, 185, 129, 1)',
+              borderWidth: 1,
+              borderRadius: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } }
+            },
+            tooltip: {
+              backgroundColor: '#0f172a',
+              titleColor: '#f8fafc',
+              bodyColor: '#34d399',
+              borderColor: '#334155',
+              borderWidth: 1,
+              callbacks: {
+                label: (ctx) => ` ${ctx.dataset.label}: ₹${ctx.raw.toLocaleString('en-IN')}`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(51, 65, 85, 0.3)' },
+              ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } }
+            },
+            y: {
+              grid: { color: 'rgba(51, 65, 85, 0.3)' },
+              ticks: {
+                color: '#94a3b8',
+                font: { family: 'JetBrains Mono', size: 10 },
+                callback: (v) => '₹' + (v / 1000) + 'k'
+              }
+            }
+          }
+        }
+      });
+
+      // --- CHART 2: Cumulative Retained Profit Trajectory (Line) ---
+      const ctx2 = document.getElementById('industrialProfitChart').getContext('2d');
+      if (industrialProfitChartInstance) industrialProfitChartInstance.destroy();
+
+      let runningSavings = 0;
+      const cumulativeData = baseline.map((base, i) => {
+        runningSavings += (base - actual[i]);
+        return runningSavings;
+      });
+
+      industrialProfitChartInstance = new Chart(ctx2, {
+        type: 'line',
+        data: {
+          labels: ['M1', 'M2', 'M3', 'M4', 'M5', 'M6'],
+          datasets: [{
+            label: 'Cumulative Profit Added to Reserves (₹)',
+            data: cumulativeData,
+            borderColor: '#06b6d4',
+            backgroundColor: 'rgba(6, 182, 212, 0.15)',
+            fill: true,
+            tension: 0.35,
+            pointBackgroundColor: '#06b6d4',
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } }
+            },
+            tooltip: {
+              backgroundColor: '#0f172a',
+              titleColor: '#f8fafc',
+              bodyColor: '#06b6d4',
+              borderColor: '#334155',
+              borderWidth: 1,
+              callbacks: {
+                label: (ctx) => ` Capital Retained: ₹${ctx.raw.toLocaleString('en-IN')}`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(51, 65, 85, 0.3)' },
+              ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } }
+            },
+            y: {
+              grid: { color: 'rgba(51, 65, 85, 0.3)' },
+              ticks: {
+                color: '#94a3b8',
+                font: { family: 'JetBrains Mono', size: 10 },
+                callback: (v) => '₹' + (v / 1000) + 'k'
+              }
+            }
+          }
+        }
+      });
+
+      // --- CHART 3: 24-Hour Load Curve & Tariff Zones (Area) ---
+      const ctx3 = document.getElementById('industrialLoadChart').getContext('2d');
+      if (industrialLoadChartInstance) industrialLoadChartInstance.destroy();
+
+      // Synthesize 24h curve based on industry type
+      const hours = Array.from({ length: 24 }, (_, i) => `${i}:00`);
+      const baseLoad = p.dailyKwh / 24;
+      const hourlyData = hours.map((_, h) => {
+        if (h >= 18 && h <= 22) return +(baseLoad * 1.85).toFixed(1); // Peak
+        if (h >= 9 && h <= 17) return +(baseLoad * 1.4).toFixed(1);  // Standard work
+        return +(baseLoad * 0.45).toFixed(1); // Night off-peak
+      });
+
+      industrialLoadChartInstance = new Chart(ctx3, {
+        type: 'line',
+        data: {
+          labels: hours,
+          datasets: [{
+            label: 'Instantaneous Demand Load (kW)',
+            data: hourlyData,
+            borderColor: '#f59e0b',
+            backgroundColor: 'rgba(245, 158, 11, 0.12)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } }
+            },
+            tooltip: {
+              backgroundColor: '#0f172a',
+              titleColor: '#f8fafc',
+              bodyColor: '#f59e0b',
+              callbacks: {
+                label: (ctx) => ` Load: ${ctx.raw} kW`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(51, 65, 85, 0.3)' },
+              ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 9 }, maxTicksLimit: 12 }
+            },
+            y: {
+              grid: { color: 'rgba(51, 65, 85, 0.3)' },
+              ticks: {
+                color: '#94a3b8',
+                font: { family: 'JetBrains Mono', size: 10 },
+                callback: (v) => v + ' kW'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function updateCommercialSimulation(shiftPct) {
+      document.getElementById('lbl-shift-val').innerText = `${shiftPct}% Shifted to Off-Peak`;
+      const baseSavings = activeProfile.accumulatedSavings || 40000;
+      const factor = 1 + (shiftPct / 50);
+      const simulatedTotal = Math.round(baseSavings * factor);
+      
+      document.getElementById('comm-total-savings').innerText = `₹${simulatedTotal.toLocaleString('en-IN')}`;
+      document.getElementById('comm-equiv-revenue').innerText = `₹${(simulatedTotal * 10).toLocaleString('en-IN')}`;
+      document.getElementById('comm-penalty-prevented').innerText = `₹${Math.round((activeProfile.todAvoided || 8500) * factor).toLocaleString('en-IN')}`;
+      
+      const totalExpense = (activeProfile.monthlyData?.[0] || 60000) * 6;
+      document.getElementById('comm-margin-boost').innerText = `+${((simulatedTotal / totalExpense) * 100).toFixed(2)}%`;
+    }
+
+    function copyBadgeCode() {
+      const code = `<div data-voltvault-certified="tier1-green-enterprise"></div>`;
+      if (document.execCommand) {
+        const el = document.createElement('textarea');
+        el.value = code;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+      }
+      showToast("Badge Embed Copied!", "Add to your storefront website footer or invoice.");
+    }
+
+    /* -------------------------------------------------------------
+       8. WHAT-IF SAVINGS PLAYGROUND
+    ------------------------------------------------------------- */
+    function runInteractiveSimulator(pct) {
+      document.getElementById('sim-percent-lbl').innerText = `${pct}% Cutback`;
+      
+      const dailyKwh = activeProfile ? activeProfile.dailyKwh : 18;
+      const rate = activeProfile ? activeProfile.tariffRate : 8.5;
+
+      const monthlyKwhSaved = (dailyKwh * 30) * (pct / 100);
+      const monthlyCashSaved = monthlyKwhSaved * rate;
+      const annualGain = monthlyCashSaved * 12;
+
+      const co2Kg = monthlyKwhSaved * 0.82;
+      const trees = co2Kg / 20;
+
+      document.getElementById('sim-monthly-cash').innerText = `₹${Math.round(monthlyCashSaved).toLocaleString('en-IN')}`;
+      document.getElementById('sim-annual-gain').innerText = `₹${Math.round(annualGain).toLocaleString('en-IN')} / yr`;
+      document.getElementById('sim-co2-saved').innerText = `${Math.round(co2Kg)} kg/mo`;
+      document.getElementById('sim-trees-saved').innerText = `${trees.toFixed(1)} Trees`;
+    }
+
+    /* -------------------------------------------------------------
+       9. NOTIFICATION TOAST HELPER
+    ------------------------------------------------------------- */
+    let toastTimeout = null;
+    function showToast(title, msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-title').innerText = title;
+      document.getElementById('toast-msg').innerText = msg;
+
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 3500);
+    }
+
+    /* -------------------------------------------------------------
+       10. ON WINDOW LOAD
+    ------------------------------------------------------------- */
+    window.onload = function() {
+      if (window.lucide) lucide.createIcons();
+      runInteractiveSimulator(15);
+    };
+  </script>
+</body>
+</html>
