@@ -1,0 +1,64 @@
+2026-11-03 13:23:56,479 [INFO] [ohmies] Logging configured cleanly without exposing credentials.
+2026-11-03 13:23:58,554 [INFO] [ohmies] Supabase credentials not configured in .env. Operating in Local Verified Dataset mode.
+2026-11-03 13:24:06,910 [INFO] [ohmies] METHOD=GET PATH=/api/health STATUS=200 DURATION=0.001s
+2026-11-03 13:24:42,728 [INFO] [ohmies] METHOD=GET PATH=/api/health STATUS=200 DURATION=0.001s
+2026-11-03 13:24:56,596 [WARNING] [ohmies] Failed login attempt for identifier: JEEV***
+2026-11-03 13:24:56,596 [INFO] [ohmies] METHOD=POST PATH=/api/auth/login STATUS=401 DURATION=0.340s
+2026-11-03 13:24:56,923 [INFO] [ohmies] Successful authentication for user: Jeevan (Meter: DOM-9821)
+2026-11-03 13:24:56,926 [INFO] [ohmies] METHOD=POST PATH=/api/auth/login STATUS=200 DURATION=0.321s
+2026-11-03 13:24:56,961 [INFO] [ohmies] Computing Overview metrics for meter: DOM-9821 (Sector: Domestic - High-Rise Apartments)
+2026-11-03 13:24:57,054 [INFO] [ohmies] METHOD=GET PATH=/api/overview STATUS=200 DURATION=0.096s
+2026-11-03 14:01:24,212 [INFO] [ohmies] Logging configured cleanly without exposing credentials.
+2026-11-03 14:01:25,835 [INFO] [ohmies] Supabase credentials not configured in .env. Operating in Local Verified Dataset mode.
+2026-11-03 14:01:50,680 [INFO] [ohmies] METHOD=GET PATH=/api/health STATUS=200 DURATION=0.003s
+2026-11-03 14:01:50,697 [INFO] [ohmies] Successful authentication for user: Jeevan (Meter: DOM-9821)
+2026-11-03 14:01:50,701 [INFO] [ohmies] METHOD=POST PATH=/api/auth/login STATUS=200 DURATION=0.010s
+2026-11-03 14:01:50,709 [INFO] [ohmies] Successful authentication for user: Jeevan (Meter: DOM-9821)
+2026-11-03 14:01:50,710 [INFO] [ohmies] METHOD=POST PATH=/api/auth/login STATUS=200 DURATION=0.002s
+2026-11-03 14:01:51,382 [WARNING] [ohmies] Failed login attempt for identifier: jeev***
+2026-11-03 14:01:51,384 [INFO] [ohmies] METHOD=POST PATH=/api/auth/login STATUS=401 DURATION=0.656s
+2026-11-03 14:01:51,408 [INFO] [ohmies] Computing Overview metrics for meter: DOM-9821 (Sector: Domestic - High-Rise Apartments)
+2026-11-03 14:01:51,530 [INFO] [ohmies] METHOD=GET PATH=/api/overview STATUS=200 DURATION=0.139s
+2026-11-03 14:01:51,553 [INFO] [ohmies] Serving Analytics data for meter DOM-9821, range 30d
+2026-11-03 14:01:51,613 [INFO] [ohmies] METHOD=GET PATH=/api/analytics/consumption STATUS=200 DURATION=0.064s
+2026-11-03 14:01:51,626 [INFO] [ohmies] Computing Green Pass Road for meter: DOM-9821 (Streak: 4)
+2026-11-03 14:01:51,627 [INFO] [ohmies] METHOD=GET PATH=/api/savings/domestic STATUS=200 DURATION=0.006s
+2026-11-03 14:01:51,636 [INFO] [ohmies] Computing Commercial Financials for meter: COM-7714 (Peak Shift: 25.0%)
+2026-11-03 14:01:51,637 [INFO] [ohmies] METHOD=GET PATH=/api/savings/commercial STATUS=200 DURATION=0.002s
+2026-11-03 14:01:51,667 [INFO] [ohmies] METHOD=GET PATH=/api/savings/simulate STATUS=200 DURATION=0.022s
+2026-11-03 14:03:29,915 [INFO] [ohmies] Successful authentication for user: Jeevan (Meter: DOM-9821)
+2026-11-03 14:03:29,916 [INFO] [ohmies] METHOD=POST PATH=/api/auth/login STATUS=200 DURATION=0.003s
+2026-11-03 14:03:29,953 [INFO] [ohmies] Computing Overview metrics for meter: DOM-9821 (Sector: Domestic - High-Rise Apartments)
+2026-11-03 14:03:30,091 [INFO] [ohmies] METHOD=GET PATH=/api/overview STATUS=200 DURATION=0.147s
+2026-11-03 14:03:30,097 [INFO] [ohmies] METHOD=GET PATH=/api/overview/profiles STATUS=200 DURATION=0.151s
+2026-11-03 14:03:31,981 [INFO] [ohmies] Computing Green Pass Road for meter: DOM-9821 (Streak: 3)
+2026-11-03 14:03:32,032 [INFO] [ohmies] METHOD=GET PATH=/api/savings/domestic STATUS=200 DURATION=0.055s
+2026-11-03 14:03:32,034 [INFO] [ohmies] METHOD=GET PATH=/api/savings/simulate STATUS=200 DURATION=0.056s
+2026-11-03 14:03:32,047 [INFO] [ohmies] Computing Green Pass Road for meter: DOM-9821 (Streak: 3)
+2026-11-03 14:03:32,049 [INFO] [ohmies] METHOD=GET PATH=/api/savings/domestic STATUS=200 DURATION=0.005s
+2026-11-03 14:03:32,100 [INFO] [ohmies] METHOD=GET PATH=/api/savings/simulate STATUS=200 DURATION=0.050s
+2026-11-03 14:03:33,380 [INFO] [ohmies] Serving Analytics data for meter DOM-9821, range 30d
+2026-11-03 14:03:33,471 [INFO] [ohmies] METHOD=GET PATH=/api/analytics/consumption STATUS=200 DURATION=0.093s
+2026-11-03 14:03:33,484 [INFO] [ohmies] Serving Analytics data for meter DOM-9821, range 30d
+2026-11-03 14:03:33,583 [INFO] [ohmies] METHOD=GET PATH=/api/analytics/consumption STATUS=200 DURATION=0.101s
+2026-11-03 14:04:16,516 [INFO] [ohmies] Computing Green Pass Road for meter: DOM-9821 (Streak: 3)
+2026-11-03 14:04:16,568 [INFO] [ohmies] METHOD=GET PATH=/api/savings/domestic STATUS=200 DURATION=0.057s
+2026-11-03 14:04:16,570 [INFO] [ohmies] METHOD=GET PATH=/api/savings/simulate STATUS=200 DURATION=0.057s
+2026-11-03 14:04:16,635 [INFO] [ohmies] Computing Green Pass Road for meter: DOM-9821 (Streak: 3)
+2026-11-03 14:04:16,636 [INFO] [ohmies] METHOD=GET PATH=/api/savings/simulate STATUS=200 DURATION=0.048s
+2026-11-03 14:04:16,638 [INFO] [ohmies] METHOD=GET PATH=/api/savings/domestic STATUS=200 DURATION=0.052s
+2026-11-03 14:04:39,569 [INFO] [ohmies] Computing Overview metrics for meter: COM-3390 (Sector: Commercial - Commercial Bakery)
+2026-11-03 14:04:39,712 [INFO] [ohmies] METHOD=GET PATH=/api/overview STATUS=200 DURATION=0.149s
+2026-11-03 14:04:39,714 [INFO] [ohmies] METHOD=GET PATH=/api/overview/profiles STATUS=200 DURATION=0.148s
+2026-11-03 14:05:04,293 [INFO] [ohmies] Computing Overview metrics for meter: DOM-9821 (Sector: Domestic - High-Rise Apartments)
+2026-11-03 14:05:04,396 [INFO] [ohmies] METHOD=GET PATH=/api/overview STATUS=200 DURATION=0.110s
+2026-11-03 14:05:04,398 [INFO] [ohmies] METHOD=GET PATH=/api/overview/profiles STATUS=200 DURATION=0.111s
+2026-11-03 14:08:19,465 [INFO] [ohmies] Serving Analytics data for meter DOM-9821, range 30d
+2026-11-03 14:08:19,561 [INFO] [ohmies] METHOD=GET PATH=/api/analytics/consumption STATUS=200 DURATION=0.099s
+2026-11-03 14:08:19,578 [INFO] [ohmies] Serving Analytics data for meter DOM-9821, range 30d
+2026-11-03 14:08:19,662 [INFO] [ohmies] METHOD=GET PATH=/api/analytics/consumption STATUS=200 DURATION=0.086s
+2026-11-03 14:08:34,663 [INFO] [ohmies] Computing Overview metrics for meter: DOM-1044 (Sector: Domestic - Independent Bungalows)
+2026-11-03 14:08:34,807 [INFO] [ohmies] METHOD=GET PATH=/api/overview STATUS=200 DURATION=0.145s
+2026-11-03 14:08:34,812 [INFO] [ohmies] METHOD=GET PATH=/api/overview/profiles STATUS=200 DURATION=0.007s
+2026-11-03 14:08:34,815 [INFO] [ohmies] Serving Analytics data for meter DOM-1044, range 30d
+2026-11-03 14:08:34,914 [INFO] [ohmies] METHOD=GET PATH=/api/analytics/consumption STATUS=200 DURATION=0.105s
